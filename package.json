@@ -1,0 +1,28 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "description": "Mesto",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vldslw/express-mesto-gha.git"
+  },
+  "author": "Vladislav Pavlov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vldslw/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/vldslw/express-mesto-gha#readme",
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
