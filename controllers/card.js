@@ -26,7 +26,7 @@ module.exports.deleteCard = (req, res) => {
   .orFail(new Error('IdNotFound'))
   .then(card => res.status(200).send({ data: card }))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
     } else if (err.message === 'IdNotFound') {
       res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
@@ -41,7 +41,7 @@ module.exports.likeCard = (req, res) => {
   .orFail(new Error('IdNotFound'))
   .then(card => res.status(200).send({ data: card }))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка' });
     } else if (err.message === 'IdNotFound') {
       res.status(404).send({ message: 'Передан несуществующий _id карточки' });
@@ -56,7 +56,7 @@ module.exports.dislikeCard = (req, res) => {
   .orFail(new Error('IdNotFound'))
   .then(card => res.status(200).send({ data: card }))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка' });
     } else if (err.message === 'IdNotFound') {
       res.status(404).send({ message: 'Передан несуществующий _id карточки' });
