@@ -40,7 +40,10 @@ module.exports.addUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name: name, about: about })
+  User.findByIdAndUpdate(req.user._id, { name: name, about: about }, {
+    new: true,
+    runValidators: true
+  })
   .orFail(new Error('IdNotFound'))
   .then((data) => res.status(200).send(data))
   .catch((err) => {
@@ -58,7 +61,10 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar: avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar: avatar }, {
+    new: true,
+    runValidators: true
+  })
   .orFail(new Error('IdNotFound'))
   .then((data) => res.status(200).send(data))
   .catch((err) => {
