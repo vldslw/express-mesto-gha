@@ -6,6 +6,7 @@ const userRouters = require('./routes/user');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
+const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
@@ -22,6 +23,6 @@ app.use((req, res, next) => {
 app.use('/', cardRouters);
 app.use('/', userRouters);
 
-app.listen(3000, () => {
-  console.log('Server started');
+app.listen(PORT, () => {
+  console.log('Сервер запущен');
 });
