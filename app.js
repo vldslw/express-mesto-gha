@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -7,6 +6,9 @@ const userRouters = require('./routes/user');
 const {
   NOT_FOUND,
 } = require('./constants/constants');
+const {
+  addUser, login,
+} = require('./controllers/user');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -16,16 +18,11 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '637c41731c53eb9da9483e14',
-  };
-
-  next();
-});
-
 app.use('/', cardRouters);
 app.use('/', userRouters);
+
+app.post('/signin', login);
+app.post('/signup', addUser);
 
 app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Страница по указанному маршруту не найдена' });

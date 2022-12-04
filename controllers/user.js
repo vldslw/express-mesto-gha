@@ -31,6 +31,21 @@ module.exports.getUser = (req, res) => {
     });
 };
 
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .orFail(new Error('IdNotFound'))
+    .then((user) => res.status(OK).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Передан некорректный _id пользователя' });
+      } else if (err.message === 'IdNotFound') {
+        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
+};
+
 module.exports.addUser = (req, res) => {
   const {
     name, about, avatar, email, password,
@@ -95,15 +110,13 @@ module.exports.updateAvatar = (req, res) => {
 };
 
 module.exports.login = (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  return User.findOne({ email }).select('+password')
     .then((user) => {
-      const { NODE_ENV, JWT_SECRET } = process.env;
-
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        'de252719f27a1b244d7eac7f05feba84e6dd6122f53e103f1f65c1effce0607f',
         { expiresIn: '7d' },
       );
 
