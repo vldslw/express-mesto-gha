@@ -28,4 +28,17 @@ app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Страница по указанному маршруту не найдена' });
 });
 
+app.use((err, req, res, next) => {
+  // если у ошибки нет статуса, выставляем 500
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+});
+
 app.listen(PORT);
