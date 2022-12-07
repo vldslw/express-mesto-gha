@@ -8,6 +8,56 @@ const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ServerError = require('../errors/server-error');
 
+module.exports.addUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => res.status(OK).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
+      } else {
+        throw new ServerError('На сервере произошла ошибка');
+      }
+    })
+    .catch(next);
+};
+
+module.exports.login = (req, res) => {
+  const { email } = req.body;
+
+  return User.findOne({ email }).select('+password')
+    .then((user) => {
+      console.log(user);
+      const token = jwt.sign(
+        { _id: user._id },
+        'de252719f27a1b244d7eac7f05feba84e6dd6122f53e103f1f65c1effce0607f',
+        { expiresIn: '7d' },
+      );
+
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .end();
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((data) => res.status(OK).send(data))
@@ -44,30 +94,6 @@ module.exports.getCurrentUser = (req, res, next) => {
         throw new BadRequestError('Передан некорректный _id пользователя');
       } else if (err.message === 'IdNotFound') {
         throw new NotFoundError('Пользователь по указанному _id не найден');
-      } else {
-        throw new ServerError('На сервере произошла ошибка');
-      }
-    })
-    .catch(next);
-};
-
-module.exports.addUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
-    .then((user) => res.status(OK).send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       } else {
         throw new ServerError('На сервере произошла ошибка');
       }
@@ -115,29 +141,4 @@ module.exports.updateAvatar = (req, res, next) => {
       }
     })
     .catch(next);
-};
-
-module.exports.login = (req, res) => {
-  const { email } = req.body;
-
-  return User.findOne({ email }).select('+password')
-    .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        'de252719f27a1b244d7eac7f05feba84e6dd6122f53e103f1f65c1effce0607f',
-        { expiresIn: '7d' },
-      );
-
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        })
-        .end();
-    })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
 };
