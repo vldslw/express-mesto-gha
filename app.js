@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { celebrate, Joi } = require('celebrate');
 const cardRouters = require('./routes/card');
 const userRouters = require('./routes/user');
 const {
@@ -21,7 +22,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/', cardRouters);
 app.use('/', userRouters);
 
-app.post('/signin', login);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }).unknown(true),
+}), login);
 app.post('/signup', addUser);
 
 app.use((req, res) => {
