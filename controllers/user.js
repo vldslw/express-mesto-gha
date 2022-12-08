@@ -37,7 +37,6 @@ module.exports.login = (req, res) => {
 
   return User.findOne({ email }).select('+password')
     .then((user) => {
-      console.log(user);
       const token = jwt.sign(
         { _id: user._id },
         'de252719f27a1b244d7eac7f05feba84e6dd6122f53e103f1f65c1effce0607f',
@@ -68,6 +67,7 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUser = (req, res, next) => {
+  console.log(req);
   const id = req.params.userId;
 
   User.findById(id)

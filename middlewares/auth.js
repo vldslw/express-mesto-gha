@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
   const { cookie } = req.headers;
-  console.log(cookie);
 
   if (!cookie || !cookie.startsWith('jwt=')) {
     return res
