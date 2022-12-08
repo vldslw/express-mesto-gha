@@ -8,7 +8,7 @@ const auth = require('../middlewares/auth');
 router.get('/users', auth, getUsers);
 router.get('/users/:userId', auth, celebrate({
   body: Joi.object().keys({
-    _id: Joi.string().hex().length(24),
+    userId: Joi.string().hex().length(24),
   }).unknown(true),
 }), getUser);
 router.get('/users/me', auth, getCurrentUser);
