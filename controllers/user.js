@@ -7,6 +7,7 @@ const {
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ServerError = require('../errors/server-error');
+const ConflictError = require('../errors/conflict-err');
 
 module.exports.addUser = (req, res, next) => {
   const {
@@ -32,6 +33,8 @@ module.exports.addUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
+      } else if (err.code === 11000) {
+        throw new ConflictError('Пользователь с таким email уже существует');
       } else {
         throw new ServerError('На сервере произошла ошибка');
       }
