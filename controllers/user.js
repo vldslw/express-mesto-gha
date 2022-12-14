@@ -21,7 +21,14 @@ module.exports.addUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(OK).send({ data: user }))
+    .then(() => res.status(OK).send({
+      data: {
+        name,
+        about,
+        avatar,
+        email,
+      },
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
@@ -67,7 +74,6 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUser = (req, res, next) => {
-  console.log(req);
   const id = req.params.userId;
 
   User.findById(id)
