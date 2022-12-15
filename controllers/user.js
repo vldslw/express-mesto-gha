@@ -8,6 +8,7 @@ const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ServerError = require('../errors/server-error');
 const ConflictError = require('../errors/conflict-err');
+const AuthError = require('../errors/auth-err');
 
 module.exports.addUser = (req, res, next) => {
   const {
@@ -61,7 +62,7 @@ module.exports.login = (req, res, next) => {
         .send({ _id: user._id });
     })
     .catch(() => {
-      throw new BadRequestError('Неправильная почта или пароль');
+      throw new AuthError('Неправильная почта или пароль');
     })
     .catch(next);
 };
