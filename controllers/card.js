@@ -35,22 +35,16 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .populate('owner')
+    .orFail(() => {
+      throw new NotFoundError('Карточка с указанным id не найдена');
+    })
     .then((card) => {
       if (card.owner.id === req.user._id) {
         Card.findByIdAndRemove(req.params.cardId)
           .orFail(() => {
-            throw new BadRequestError('Передан некорректный id при удалении карточки');
+            throw new NotFoundError('Карточка с указанным id не найдена');
           })
           .then(() => res.status(OK).send({ data: card }))
-          .catch((err) => {
-            if (err.name === 'CastError') {
-              throw new BadRequestError('Переданы некорректные данные при удалении карточки');
-            } else if (err.message === 'IdNotFound') {
-              throw new NotFoundError('Карточка с указанным _id не найдена');
-            } else {
-              throw new ServerError('На сервере произошла ошибка');
-            }
-          })
           .catch(next);
       } else {
         throw new ForbiddenError('Нельзя удалить чужую карточку');
