@@ -42,10 +42,10 @@ module.exports.addUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.login = (req, res) => {
-  const { email } = req.body;
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
 
-  return User.findOne({ email }).select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
@@ -60,11 +60,10 @@ module.exports.login = (req, res) => {
         })
         .end();
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(() => {
+      throw new BadRequestError('Неправильная почта или пароль');
+    })
+    .catch(next);
 };
 
 module.exports.getUsers = (req, res, next) => {
