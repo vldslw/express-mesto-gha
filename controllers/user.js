@@ -58,7 +58,7 @@ module.exports.login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .end();
+        .send({ _id: user._id });
     })
     .catch(() => {
       throw new BadRequestError('Неправильная почта или пароль');
