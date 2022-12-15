@@ -5,6 +5,7 @@ const {
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ServerError = require('../errors/server-error');
+const ForbiddenError = require('../errors/forbidden-err');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -32,16 +33,27 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new Error('IdNotFound'))
-    .then((card) => res.status(OK).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные при удалении карточки');
-      } else if (err.message === 'IdNotFound') {
-        throw new NotFoundError('Карточка с указанным _id не найдена');
+  Card.findById(req.params.cardId)
+    .populate('owner')
+    .then((card) => {
+      if (card.owner.id === req.user._id) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .orFail(() => {
+            throw new BadRequestError('Передан некорректный id при удалении карточки');
+          })
+          .then(() => res.status(OK).send({ data: card }))
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              throw new BadRequestError('Переданы некорректные данные при удалении карточки');
+            } else if (err.message === 'IdNotFound') {
+              throw new NotFoundError('Карточка с указанным _id не найдена');
+            } else {
+              throw new ServerError('На сервере произошла ошибка');
+            }
+          })
+          .catch(next);
       } else {
-        throw new ServerError('На сервере произошла ошибка');
+        throw new ForbiddenError('Нельзя удалить чужую карточку');
       }
     })
     .catch(next);
