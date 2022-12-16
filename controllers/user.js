@@ -23,14 +23,15 @@ module.exports.addUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then(() => res.status(OK).send({
-      data: {
+    .then((data) => {
+      res.status(OK).send({
         name,
         about,
         avatar,
         email,
-      },
-    }))
+        _id: data._id,
+      });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
