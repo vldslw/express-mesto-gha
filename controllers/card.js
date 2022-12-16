@@ -9,6 +9,7 @@ const ForbiddenError = require('../errors/forbidden-err');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
+    .populate(['owner', 'likes'])
     .then((data) => res.status(OK).send(data))
     .catch(() => {
       throw new ServerError('На сервере произошла ошибка');
@@ -21,7 +22,11 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(OK).send({ data: card }))
+    .then((data) => {
+      Card.findById(data._id)
+        .populate(['owner', 'likes'])
+        .then((card) => res.status(OK).send(card));
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании карточки');
@@ -34,7 +39,7 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .populate('owner')
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new NotFoundError('Карточка с указанным id не найдена');
     })
@@ -55,6 +60,7 @@ module.exports.deleteCard = (req, res, next) => {
 
 module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .populate(['owner', 'likes'])
     .orFail(new Error('IdNotFound'))
     .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
@@ -71,6 +77,7 @@ module.exports.likeCard = (req, res, next) => {
 
 module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .populate(['owner', 'likes'])
     .orFail(new Error('IdNotFound'))
     .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
