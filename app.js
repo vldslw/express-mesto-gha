@@ -7,12 +7,12 @@ const { errors } = require('celebrate');
 const cardRouters = require('./routes/card');
 const userRouters = require('./routes/user');
 const {
-  NOT_FOUND,
   urlPattern,
 } = require('./constants/constants');
 const {
   addUser, login,
 } = require('./controllers/user');
+const NotFoundError = require('./errors/not-found-err');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -42,8 +42,8 @@ app.post('/signup', celebrate({
   }).unknown(true),
 }), addUser);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Страница по указанному маршруту не найдена' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница по указанному маршруту не найдена'));
 });
 
 app.use(errors());

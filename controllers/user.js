@@ -6,9 +6,7 @@ const {
 } = require('../constants/constants');
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
-const ServerError = require('../errors/server-error');
 const ConflictError = require('../errors/conflict-err');
-const AuthError = require('../errors/auth-err');
 
 module.exports.addUser = (req, res, next) => {
   const {
@@ -34,14 +32,13 @@ module.exports.addUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже существует');
+        next(new ConflictError('Пользователь с таким email уже существует'));
       } else {
-        throw new ServerError('На сервере произошла ошибка');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -62,18 +59,12 @@ module.exports.login = (req, res, next) => {
         })
         .status(OK).send({ _id: user._id });
     })
-    .catch(() => {
-      throw new AuthError('Неправильная почта или пароль');
-    })
     .catch(next);
 };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((data) => res.status(OK).send(data))
-    .catch(() => {
-      throw new ServerError('На сервере произошла ошибка');
-    })
     .catch(next);
 };
 
@@ -81,33 +72,25 @@ module.exports.getUser = (req, res, next) => {
   const id = req.params.userId;
 
   User.findById(id)
-    .orFail(new Error('IdNotFound'))
-    .then((user) => res.status(OK).send({ data: user }))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному id не найден');
+    })
+    .then((user) => res.status(OK).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Передан некорректный _id пользователя');
-      } else if (err.message === 'IdNotFound') {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
+        next(new BadRequestError('Передан некорректный id пользователя'));
       } else {
-        throw new ServerError('На сервере произошла ошибка');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new Error('IdNotFound'))
-    .then((user) => res.status(OK).send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Передан некорректный _id пользователя');
-      } else if (err.message === 'IdNotFound') {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      } else {
-        throw new ServerError('На сервере произошла ошибка');
-      }
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному id не найден');
     })
+    .then((user) => res.status(OK).send(user))
     .catch(next);
 };
 
@@ -118,18 +101,17 @@ module.exports.updateUser = (req, res, next) => {
     new: true,
     runValidators: true,
   })
-    .orFail(new Error('IdNotFound'))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному id не найден');
+    })
     .then((data) => res.status(OK).send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
-      } else if (err.message === 'IdNotFound') {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       } else {
-        throw new ServerError('На сервере произошла ошибка');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -139,16 +121,15 @@ module.exports.updateAvatar = (req, res, next) => {
     new: true,
     runValidators: true,
   })
-    .orFail(new Error('IdNotFound'))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному id не найден');
+    })
     .then((data) => res.status(OK).send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении аватара');
-      } else if (err.message === 'IdNotFound') {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       } else {
-        throw new ServerError('На сервере произошла ошибка');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
