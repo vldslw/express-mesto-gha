@@ -6,20 +6,20 @@ const {
 const auth = require('../middlewares/auth');
 const { urlPattern } = require('../constants/constants');
 
-router.get('/users', auth, getUsers);
-router.get('/users/me', auth, getCurrentUser);
-router.patch('/users/me', auth, celebrate({
+router.get('/', auth, getUsers);
+router.get('/me', auth, getCurrentUser);
+router.patch('/me', auth, celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(30),
   }).unknown(true),
 }), updateUser);
-router.patch('/users/me/avatar', auth, celebrate({
+router.patch('/me/avatar', auth, celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().pattern(urlPattern),
   }).unknown(true),
 }), updateAvatar);
-router.get('/users/:userId', auth, celebrate({
+router.get('/:userId', auth, celebrate({
   params: Joi.object().keys({
     userId: Joi.string().required().hex().length(24),
   }).unknown(true),

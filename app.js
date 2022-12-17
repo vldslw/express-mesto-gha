@@ -23,8 +23,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/', cardRouters);
-app.use('/', userRouters);
+app.use('/cards', cardRouters);
+app.use('/users', userRouters);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
