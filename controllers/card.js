@@ -40,8 +40,8 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (card.owner.id === req.user._id) {
-        Card.findByIdAndRemove(req.params.cardId)
-          .then(() => res.status(OK).send(card));
+        card.remove();
+        res.status(OK).send(card);
       } else {
         throw new ForbiddenError('Нельзя удалить чужую карточку');
       }
