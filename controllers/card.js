@@ -18,11 +18,7 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((data) => {
-      Card.findById(data._id)
-        .populate(['owner', 'likes'])
-        .then((card) => res.status(OK).send(card));
-    })
+    .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карточки'));
@@ -40,13 +36,20 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (card.owner.id === req.user._id) {
-        card.remove();
-        res.status(OK).send(card);
+        card.remove()
+          .then(() => res.status(OK).send(card))
+          .catch(next);
       } else {
         throw new ForbiddenError('Нельзя удалить чужую карточку');
       }
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Передан невалидный id карточки'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {

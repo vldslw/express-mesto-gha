@@ -23,10 +23,10 @@ module.exports.addUser = (req, res, next) => {
     }))
     .then((data) => {
       res.status(OK).send({
-        name,
-        about,
-        avatar,
-        email,
+        name: data.name,
+        about: data.about,
+        avatar: data.avatar,
+        email: data.email,
         _id: data._id,
       });
     })
