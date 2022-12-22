@@ -31,7 +31,7 @@ module.exports = (req, res, next) => {
   // let payload;
 
   // try {
-  //   payload = jwt.verify(token, 'de252719f27a1b244d7eac7f05feba84e6dd6122f53e103f1f65c1effce0607f');
+  //   payload = jwt.verify(token, '');
   // } catch (err) {
   //   next(new AuthError('Необходима авторизация'));
   //   return;

@@ -7,7 +7,7 @@ const NotFoundError = require('../errors/not-found-err');
 const ForbiddenError = require('../errors/forbidden-err');
 
 module.exports.getCards = (req, res, next) => {
-  Card.find({})
+  Card.find({}).sort({ createdAt: -1 })
     .populate(['owner', 'likes'])
     .then((data) => res.status(OK).send(data))
     .catch(next);
@@ -18,7 +18,12 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(OK).send(card))
+    .then((data) => {
+      Card.findById(data._id)
+        .populate(['owner', 'likes'])
+        .then((card) => res.status(OK).send(card))
+        .catch(next);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карточки'));
