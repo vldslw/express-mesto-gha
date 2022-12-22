@@ -52,12 +52,18 @@ module.exports.login = (req, res, next) => {
         { expiresIn: '7d' },
       );
 
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        })
-        .status(OK).send({ _id: user._id });
+      console.log(token);
+
+      res.send({ token });
+
+      // res
+      //   .cookie('jwt', token, {
+      //     maxAge: 3600000 * 24 * 7,
+      //     httpOnly: true,
+      //     sameSite: false,
+      //     secure: true,
+      //   })
+      //   .status(OK).send({ _id: user._id });
     })
     .catch(next);
 };

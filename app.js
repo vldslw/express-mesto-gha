@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
@@ -14,10 +15,24 @@ const {
 } = require('./controllers/user');
 const NotFoundError = require('./errors/not-found-err');
 
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'origin', 'Authorization', 'Access-Control-Allow-Origin'],
+  credentials: true,
+};
+
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
+
+app.use('*', cors(corsOptions));
 
 app.use(cookieParser());
 app.use(bodyParser.json());
