@@ -14,6 +14,7 @@ const {
   addUser, login,
 } = require('./controllers/user');
 const NotFoundError = require('./errors/not-found-err');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const corsOptions = {
   origin: [
@@ -38,6 +39,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(requestLogger);
+
 app.use('/cards', cardRouters);
 app.use('/users', userRouters);
 
@@ -60,6 +63,8 @@ app.post('/signup', celebrate({
 app.use((req, res, next) => {
   next(new NotFoundError('Страница по указанному маршруту не найдена'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
